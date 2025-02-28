@@ -1,5 +1,5 @@
 /*
- * *** YOUR NAME GOES HERE / YOUR SECTION NUMBER ***
+ * *** Rachel Riemersma / 001 ***
  *
  * This hashMap object represents an over simplification of Java's implementation of HashMap within
  * Java's Collection Framework Library. You are to complete the following methods:
@@ -58,7 +58,7 @@
  *      boolean isEmpty()          - returns true if this map contains no key-value mappings.
  *
  *
- *  Methods *NOT* implemented to fully emulate the behavior 
+ *  Methods *NOT* implemented to fully emulate the behavior
  *  of Java's HashMap Class
  *      - clone()
  *      - compute()
@@ -215,23 +215,39 @@ class myHashMap<K,V> {
      *
      * @param key - key value for the <key,value> pair to remove
      *
-     * @return value - return the node for the <key,value> 
+     * @return value - return the node for the <key,value>
      *                 removed, else null if not found
      */
 
     public V remove(K key) {
-
-        /*
-         * ADD YOUR CODE HERE
-         *
-         * Review the code in the whole object to understand teh data structures layout.
-         * Additionally, review the method put() for inserting a new Key / Value pair into
-         * the HashMap. This method will do the opposite by removing an element. Do see
-         * the return value discussion in this method's prologue to make sure the correct
-         * return value is returned the invoking function based on the remove outcome.
-         */
-
-        return null;
+        // Get index of the bucket where the key is
+        int index = getBucketIndex(key);
+        // Get the head node of the linked lust at the index
+        HashNode<K, V> head = bucket.get(index);
+        HashNode<K, V> prev = null;
+        V removedValue = null;
+        // Traverse the linked list to find the node that corresponds with the key
+        while (head != null && removedValue == null) {
+            if (head.key.equals(key)) {
+                // If node is found,and it's not the first node, bypass it
+                if (prev != null) {
+                    prev.next = head.next;
+                // Node is found, it is the first node, set bucket index to point to the next node
+                } else {
+                    bucket.set(index, head.next);
+                }
+                // Decrement the size of hashmap since element was removed
+                size--;
+                // Store the value
+                removedValue = head.value;
+            } else {
+                // Move prev pointer forward before moving head pointer
+                prev = head;
+                // Move to next node
+                head = head.next;
+            }
+        }
+        return removedValue;
     }
 
 
@@ -241,7 +257,7 @@ class myHashMap<K,V> {
      * Removes the entry for the specified key only if it is currently mapped to some value
      *
      * @param: key - key for identifying <k,v>
-     * @param: val - will remove <k,v> only if existing value 
+     * @param: val - will remove <k,v> only if existing value
      *               equals val
      *
      * @return: true if deleted, else false
@@ -251,8 +267,8 @@ class myHashMap<K,V> {
 
         V originalValue = get(key);
 
-        if (originalValue == null || 
-           (! originalValue.equals(val)) ) {
+        if (originalValue == null ||
+                (! originalValue.equals(val)) ) {
             return false;
         }
 
@@ -275,10 +291,10 @@ class myHashMap<K,V> {
      * map and rehash the whole hash map.
      *
      * @param key   - Key to the <k,v> pair operate on
-     * @param value - if key found, value is updated to this 
+     * @param value - if key found, value is updated to this
      *                param, else routine inserts <k,v>
      *
-     * @return value - if key exists, returns old value before 
+     * @return value - if key exists, returns old value before
      *                 replacing with provided value, else null.
      */
 
@@ -321,8 +337,8 @@ class myHashMap<K,V> {
         }
 
         /*
-         * Check the load factor of the hashmap, if greater 
-         * than DEFAULT_LOAD_FACTOR, we will double the number 
+         * Check the load factor of the hashmap, if greater
+         * than DEFAULT_LOAD_FACTOR, we will double the number
          * of buckets of our hashmap.
          */
 
@@ -341,7 +357,7 @@ class myHashMap<K,V> {
              * Traverse the original buckets, and for each bucket
              * traverse the nodes stored there (via linked-list).
              * For each node (<key, value> pair), add to the new
-             * (grown) bucket list. The re-add process will 
+             * (grown) bucket list. The re-add process will
              * rehash the keys to the new bucket size.
              */
             for (HashNode<K, V> headNode : tmp) {
@@ -366,7 +382,7 @@ class myHashMap<K,V> {
      * @parem: value - The value to place in as a <k, v> pair if
      *                 key does not exist
      *
-     * @return: V - returns the existing value if the key is 
+     * @return: V - returns the existing value if the key is
      *              found, else null
      */
 
@@ -388,53 +404,69 @@ class myHashMap<K,V> {
      * Replaces the entry for the specified key only if it is currently mapped to some value (aka, the
      * key already exist with some value).
      *
-     *  @param key   - Key for the <k, v> pair to replace its 
+     *  @param key   - Key for the <k, v> pair to replace its
      *                 value
-     *  @param val   - The new value to replace the old one if 
+     *  @param val   - The new value to replace the old one if
      *                 found.
      *
-     *  @return V  - returns the old value for the <k,v> pair, 
+     *  @return V  - returns the old value for the <k,v> pair,
      *               else null if not found.
      */
 
     public V replace(K key, V val) {
-
-        /*
-         * ADD YOUR CODE HERE - DO NOT FORGET TO ADD YOUR NAME AT TOP OF FILE
-         *
-         * Make sure you return the proper value based on the outcome of this method's
-         * replace (see method's prologue above).
-         */
-
-        return val;
+        // Get the index of the bucket where the key is located
+        int index = getBucketIndex(key);
+        // Get the head of the linked list at the bucket index
+        HashNode<K, V> head = bucket.get(index);
+        // Stores the old value
+        V oldValue = null;
+        // Traverses linked list to find key
+        while (head != null && oldValue == null) {
+            // If key is found, store the old value and replace with new value
+            if (head.key.equals(key)) {
+                oldValue = head.value;
+                head.value = val;
+            }
+            // Move to next node
+            head = head.next;
+        }
+        return oldValue;
     }
 
-    
+
     /**
      * method: boolean replace(K, V, V)
      *
      * Replaces the entry for the specified key only if currently mapped to the specified value.
      *
-     *  @param key    - Key for the <k, v> pair to replace its 
+     *  @param key    - Key for the <k, v> pair to replace its
      *                  value
-     *  @param oldVal - Replace only if current <k,v>'s value 
+     *  @param oldVal - Replace only if current <k,v>'s value
      *                  is same as oldVal
      *  @param newVal - the new value to use.
      *
-     *  @return V  - returns the old value for the <k,v> pair, 
+     *  @return V  - returns the old value for the <k,v> pair,
      *               else null if not found.
      */
 
     public boolean replace(K key, V oldVal, V newVal) {
-
-        /*
-         * ADD YOUR CODE HERE
-         *
-         * This method should apply the precondition (aka, the Key already exists with the
-         * value 'oldval', and is so, it SHOULD call replace(K, V) for code reuse.
-         */
-
-        return false;
+        // Get index of bucket where the key is
+        int index = getBucketIndex(key);
+        // Get the head of linked list at the bucket index
+        HashNode<K, V> head = bucket.get(index);
+        // Initialize boolean variable
+        boolean replaced = false;
+        // Traverse linked list to find key
+        while (head != null && !replaced) {
+            // If key is found, replace with new value and set replaced to true
+            if (head.key.equals(key) && head.value.equals(oldVal)) {
+                head.value = newVal;
+                replaced = true;
+            }
+            // Move to next node
+            head = head.next;
+        }
+        return replaced;
     }
 
 
@@ -443,7 +475,7 @@ class myHashMap<K,V> {
      *
      * Returns true if this map maps one or more keys to the specified value
      *
-     * @param val: Value to search for in hashmap to determine 
+     * @param val: Value to search for in hashmap to determine
      *             if it is contained there.
      *
      * @return: true if found, else false.
@@ -468,7 +500,7 @@ class myHashMap<K,V> {
      *
      * Returns true if this map contains a mapping for the specified key.
      *
-     * @param key: The key to search for to determine of hash 
+     * @param key: The key to search for to determine of hash
      *             map contains it
      *
      * @return: true if found, else false.
